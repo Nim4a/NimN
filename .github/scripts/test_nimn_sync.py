@@ -196,8 +196,11 @@ class SyncTestCase(unittest.TestCase):
         out = self.run_main(runner)
         self.assertEqual(len(runner.tags), 1)
         release_tag = runner.tags[0]
-        # state rewritten to the integrated upstream release
-        self.assertEqual(self.read_state(), {"tag": NEW_TAG, "sha": NEW_SHA})
+        # state rewritten to the integrated upstream release, with resume candidate
+        state = self.read_state()
+        self.assertEqual(state["tag"], NEW_TAG)
+        self.assertEqual(state["sha"], NEW_SHA)
+        self.assertEqual(state["candidate"], release_tag)
         # tag shape: base from Directory.Build.props + numeric id + sha prefix
         self.assertRegex(release_tag, r"^v7\.25\.1-nimn\.\d+\.[0-9a-f]{8}$")
         self.assertTrue(release_tag.endswith(NEW_SHA[:8]))
