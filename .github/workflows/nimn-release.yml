@@ -5,6 +5,14 @@ on:
     tags:
       - 'v*-nimn.*'
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      release_tag:
+        required: true
+        type: string
+      draft_only:
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -19,10 +27,15 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
+          ref: ${{ inputs.release_tag || github.ref }}
           submodules: recursive
       - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
         with:
           dotnet-version: '10.0.x'
+      - name: Protect NimN customizations
+        run: python .github/scripts/nimn_guard.py
+      - name: Automation unit tests
+        run: python -B -m unittest discover -s .github/scripts -p 'test_nimn*.py'
       - name: Unit tests
         run: dotnet test --project ./v2rayN/ServiceLib.Tests -c Release --results-directory ./TestResults -- --report-trx
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -46,9 +59,11 @@ jobs:
     env:
       PROJECT: ${{ matrix.project }}
       PACKAGE: ${{ matrix.package }}
+      RELEASE_TAG: ${{ inputs.release_tag || github.ref_name }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
+          ref: ${{ inputs.release_tag || github.ref }}
           submodules: recursive
       - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
         with:
@@ -56,8 +71,8 @@ jobs:
       - name: Publish app and updater
         shell: pwsh
         run: |
-          $version = '7.25.1-nimn.1'
-          if ($env:GITHUB_REF_TYPE -eq 'tag') { $version = $env:GITHUB_REF_NAME.TrimStart('v') }
+          $version = '7.25.1-nimn.3'
+          if ($env:RELEASE_TAG -match '^v[0-9]+\.[0-9]+\.[0-9]+-nimn\.') { $version = $env:RELEASE_TAG.TrimStart('v') }
           $output = Join-Path $env:GITHUB_WORKSPACE $env:PACKAGE
           dotnet publish "v2rayN/$env:PROJECT" -c Release -r win-x64 -p:SelfContained=true -p:EnableWindowsTargeting=true "-p:Version=$version" -o $output
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -66,21 +81,20 @@ jobs:
           if (!(Test-Path "$output/NimN.exe")) { throw 'Missing NimN.exe' }
           if ((Get-Item "$output/NimN.exe").VersionInfo.ProductName -ne 'NimN') { throw 'Incorrect product identity' }
       - name: Bundle cores and regional data
+        env:
+          GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
-          curl -fL --retry 3 -o core-bin.zip 'https://github.com/2dust/v2rayN-core-bin/raw/574cacd03e03411b49ca8a4fb46bdb4e4253d394/v2rayN-windows-64.zip'
-          7z x -y core-bin.zip -ocore-base
-          cp -an core-base/v2rayN-windows-64/. "$PACKAGE/"
-          curl -fL --retry 3 -o xray.zip 'https://github.com/patterniha/Xray-core/releases/download/v26.9.13/Xray-windows-64.zip'
-          7z x -y xray.zip -ocore-xray
-          mkdir -p "$PACKAGE/bin/xray" "$PACKAGE/bin/srss"
-          cp -f core-xray/xray* "$PACKAGE/bin/xray/"
-          for name in geosite geoip; do
-            curl -fL --retry 3 -o "$PACKAGE/bin/$name.dat" "https://github.com/Chocolate4U/Iran-v2ray-rules/releases/download/202609160928/$name.dat"
-          done
-          curl -fL --retry 3 -o "$PACKAGE/bin/srss/geosite-category-ir.srs" 'https://raw.githubusercontent.com/chocolate4u/Iran-sing-box-rules/rule-set/geosite-category-ir.srs'
-          curl -fL --retry 3 -o "$PACKAGE/bin/srss/geoip-ir.srs" 'https://raw.githubusercontent.com/chocolate4u/Iran-sing-box-rules/rule-set/geoip-ir.srs'
+          UPSTREAM_TAG=$(python -c "import json; print(json.load(open('.github/nimn-upstream.json'))['tag'])")
+          curl -fL --retry 3 -o upstream.zip "https://github.com/patterniha/PattN/releases/download/$UPSTREAM_TAG/PattN-windows-64.zip"
+          DIGEST=$(gh api "repos/patterniha/PattN/releases/tags/$UPSTREAM_TAG" --jq '.assets[] | select(.name == "PattN-windows-64.zip") | .digest')
+          [[ "$DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]] || { echo "Missing or invalid upstream SHA256 digest"; exit 1; }
+          printf '%s  upstream.zip\n' "${DIGEST#sha256:}" | sha256sum -c -
+          7z x -y upstream.zip -oupstream-package
+          test -d upstream-package/PattN-windows-64/bin
+          mkdir -p "$PACKAGE/bin"
+          cp -a upstream-package/PattN-windows-64/bin/. "$PACKAGE/bin/"
           test -s "$PACKAGE/bin/xray/xray.exe"
           test -s "$PACKAGE/NimN.exe"
           cp LICENSE "$PACKAGE/LICENSE.txt"
@@ -102,7 +116,7 @@ jobs:
           if-no-files-found: error
 
   release:
-    if: startsWith(github.ref, 'refs/tags/')
+    if: github.repository == 'Nim4a/NimN' && (inputs.release_tag != '' || startsWith(github.ref, 'refs/tags/'))
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -113,13 +127,38 @@ jobs:
           pattern: NimN-windows-64*
           path: dist
           merge-multiple: true
-      - name: Publish prerelease
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: my-releases
+          fetch-depth: 0
+          clean: false
+      - name: Advance branch before standalone publication
+        if: inputs.draft_only != true
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag || github.ref_name }}
+        run: |
+          set -euo pipefail
+          git fetch origin "refs/tags/$RELEASE_TAG:refs/tags/$RELEASE_TAG"
+          git merge --ff-only "$RELEASE_TAG"
+          git push origin HEAD:my-releases
+      - name: Publish verified release
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_TAG: ${{ inputs.release_tag || github.ref_name }}
+          DRAFT_ONLY: ${{ inputs.draft_only }}
         run: |
           set -euo pipefail
-          gh release create "$RELEASE_TAG" --verify-tag --draft --prerelease --title "NimN $RELEASE_TAG" --notes 'Personal PattN fork: NI application and status icons, NimN branding, bundled country flag images beside profile names. Country flags update automatically from public server IP lookup over HTTPS (ipwho.is); measured exit-country results take precedence. Only public IPs are submitted, never credentials. Server location can differ from exit location; unknown locations are not guessed. Windows x64 WPF and Avalonia portable packages. Unsigned binaries; SHA-256 checksums included. Unit tests and both UI builds must pass before upload. Device-side connection testing is still required.'
-          gh release upload "$RELEASE_TAG" dist/*.zip dist/*.sha256
-          gh release edit "$RELEASE_TAG" --draft=false
+          gh api --paginate --slurp "repos/$GH_REPO/releases?per_page=100" > releases.json
+          STATUS=$(jq -r --arg tag "$RELEASE_TAG" '[.[][] | select(.tag_name == $tag)][0] | if . == null then "missing" elif .draft then "draft" else "published" end' releases.json)
+          if [ "$STATUS" = published ]; then
+            echo "Release already published; leaving assets immutable"
+            exit 0
+          fi
+          if [ "$STATUS" = missing ]; then
+            gh release create "$RELEASE_TAG" --verify-tag --draft --prerelease --title "NimN $RELEASE_TAG" --notes 'Personal PattN fork: NI application and status icons, NimN branding, bundled country flag images beside profile names. Country flags update automatically from public server IP lookup over HTTPS (ipwho.is); measured exit-country results take precedence. Only public IPs are submitted, never credentials. Server location can differ from exit location; unknown locations are not guessed. Windows x64 WPF and Avalonia portable packages. Unsigned binaries; SHA-256 checksums included. Unit tests and both UI builds must pass before upload. Device-side connection testing is still required.'
+          fi
+          gh release upload "$RELEASE_TAG" dist/*.zip dist/*.sha256 --clobber
+          if [ "$DRAFT_ONLY" != true ]; then
+            gh release edit "$RELEASE_TAG" --draft=false --prerelease=false --latest
+          fi

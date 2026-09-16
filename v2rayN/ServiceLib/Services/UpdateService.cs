@@ -181,7 +181,13 @@ public partial class UpdateService(Config config, Func<bool, string, Task> updat
     {
         var coreInfo = CoreInfoManager.Instance.GetCoreInfo(type);
         var tagName = string.Empty;
-        if (preRelease || coreInfo?.LockedMaxVersion != null)
+        if (type == ECoreType.v2rayN)
+        {
+            var json = await downloadHandle.TryDownloadString(coreInfo?.ReleaseApiUrl + "?per_page=100", blProxy, Global.AppName);
+            tagName = NimNRelease.SelectTag(JsonUtils.Deserialize<List<GitHubRelease>>(json), preRelease);
+            if (tagName.IsNullOrEmpty()) return new UpdateResult(false, "No complete NimN release available");
+        }
+        else if (preRelease || coreInfo?.LockedMaxVersion != null)
         {
             var url = coreInfo?.ReleaseApiUrl;
             var result = await downloadHandle.TryDownloadString(url, blProxy, Global.AppName);

@@ -1,0 +1,100 @@
+name: NimN upstream sync
+on:
+  schedule:
+    - cron: '23 */6 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+  issues: write
+env:
+  REVIEW_ISSUE_TITLE: NimN sync needs review
+concurrency:
+  group: nimn-upstream-sync
+  cancel-in-progress: false
+jobs:
+  gate:
+    if: github.repository == 'Nim4a/NimN'
+    runs-on: ubuntu-latest
+    outputs:
+      blocked: ${{ steps.gate.outputs.blocked }}
+    steps:
+      - id: gate
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT" = schedule ]; then
+            gh api --paginate --slurp "repos/$GH_REPO/issues?state=open&per_page=100" > issues.json
+            BLOCKED=$(jq --arg title "$REVIEW_ISSUE_TITLE" 'any(.[][]; .title == $title and .pull_request == null)' issues.json)
+            echo "blocked=$BLOCKED" >> "$GITHUB_OUTPUT"
+          fi
+  prepare:
+    needs: gate
+    if: github.repository == 'Nim4a/NimN' && needs.gate.outputs.blocked != 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.sync.outputs.tag }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: my-releases
+          fetch-depth: 0
+      - name: Merge latest stable upstream release
+        id: sync
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 .github/scripts/nimn_sync.py
+  draft:
+    needs: prepare
+    if: needs.prepare.outputs.tag != ''
+    uses: ./.github/workflows/nimn-release.yml
+    with:
+      release_tag: ${{ needs.prepare.outputs.tag }}
+      draft_only: true
+    permissions:
+      contents: write
+  advance:
+    needs: [prepare, draft]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: my-releases
+          fetch-depth: 0
+      - env:
+          RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
+        run: |
+          set -euo pipefail
+          git fetch origin "refs/tags/$RELEASE_TAG:refs/tags/$RELEASE_TAG"
+          git merge --ff-only "$RELEASE_TAG"
+          git push origin HEAD:my-releases
+  publish:
+    needs: [prepare, advance]
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
+        run: gh release edit "$RELEASE_TAG" --draft=false --prerelease=false --latest
+  report:
+    needs: [gate, prepare, draft, advance, publish]
+    if: failure() && github.repository == 'Nim4a/NimN'
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          gh api --paginate --slurp "repos/$GH_REPO/issues?state=open&per_page=100" > issues.json
+          NUMBER=$(jq -r --arg title "$REVIEW_ISSUE_TITLE" '[.[][] | select(.title == $title and .pull_request == null)][0].number // empty' issues.json)
+          BODY="Automatic update stopped. Inspect $RUN_URL . Do not replace NimN changes with upstream files or bypass failed checks. Close this issue after review; scheduled syncs are blocked while it is open. Manual dispatch retries are allowed."
+          if [ -n "$NUMBER" ]; then
+            gh issue comment "$NUMBER" --body "$BODY"
+          else
+            gh issue create --title "$REVIEW_ISSUE_TITLE" --body "$BODY"
+          fi
