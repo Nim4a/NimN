@@ -2,7 +2,7 @@ namespace ServiceLib;
 
 public class Global
 {
-    public const string AppName = "PattN";
+    public const string AppName = "NimN";
     public const string GithubUrl = "https://github.com";
     public const string GithubApiUrl = "https://api.github.com/repos";
     public const string GeoUrl = "https://github.com/Chocolate4U/Iran-v2ray-rules/releases/latest/download/{0}.dat";
@@ -86,7 +86,7 @@ public class Global
     public const int MinFontSize = 8;
     public const int MinFontSizeCount = 13;
     public const string RebootAs = "rebootas";
-    public const string AvaAssets = "avares://PattN/Assets/";
+    public const string AvaAssets = "avares://NimN/Assets/";
     public const string LocalAppData = "V2RAYN_LOCAL_APPLICATION_DATA_V2";
     public const string V2RayLocalAsset = "V2RAY_LOCATION_ASSET";
     public const string XrayLocalAsset = "XRAY_LOCATION_ASSET";

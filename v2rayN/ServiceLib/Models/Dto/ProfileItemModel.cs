@@ -33,6 +33,9 @@ public partial class ProfileItemModel : ReactiveObject
     public partial string TodayUp { get; set; }
 
     [Reactive]
+    public partial string CountryCode { get; set; }
+
+    [Reactive]
     public partial string TodayDown { get; set; }
 
     [Reactive]

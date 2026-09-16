@@ -213,6 +213,12 @@
                         Header="{x:Static resx:ResUI.LvServiceType}"
                         Tag="ConfigType" />
 
+                    <DataGridTextColumn
+                        Width="50"
+                        Binding="{Binding CountryCode}"
+                        Header="{x:Static resx:ResUI.LvCountry}"
+                        Tag="CountryCode" />
+
                     <DataGridTemplateColumn SortMemberPath="Remarks" Tag="Remarks">
                         <DataGridTemplateColumn.Header>
                             <TextBlock Text="{x:Static resx:ResUI.LvRemarks}" />

@@ -164,7 +164,8 @@ public class ProfileItem
     public int? PreSocksPort { get; set; }
     public bool DisplayLog { get; set; } = true;
     public string Remarks { get; set; }
-    public string Address { get; set; }
+        public string? CountryCode { get; set; }
+        public string Address { get; set; }
     public int Port { get; set; }
     public string Password { get; set; }
     public string Username { get; set; }
