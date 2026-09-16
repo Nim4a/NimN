@@ -19,6 +19,7 @@ public partial class ProfilesViewModel : MyReactiveObject
     private readonly Dictionary<string, bool> _dicHeaderSort = new();
     private SpeedtestService? _speedtestService;
     private string? _pendingSelectIndexId;
+    private int _countryRefresh;
 
     #endregion private prop
 
@@ -376,6 +377,28 @@ public partial class ProfilesViewModel : MyReactiveObject
         }
 
         await DispatcherRefreshServersBizInteraction.HandleSafe(RxVoid.Default);
+        var generation = Interlocked.Increment(ref _countryRefresh);
+        var snapshot = ProfileItems.ToList();
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                foreach (var item in snapshot)
+                {
+                    if (generation != Volatile.Read(ref _countryRefresh)) break;
+                    if (item.ConfigType.IsComplexType() || item.ConfigType == EConfigType.Custom
+                        || ProfileCountry.Resolve(item.IpInfo, null) != null) continue;
+                    var country = await ServerCountryService.Instance.ResolveAsync(item.Address);
+                    if (generation != Volatile.Read(ref _countryRefresh)) break;
+                    RxSchedulers.MainThreadScheduler.Schedule(() =>
+                    {
+                        if (generation == Volatile.Read(ref _countryRefresh)) item.ServerCountryCode = country;
+                    });
+                }
+            }
+            catch (OperationCanceledException) { }
+            catch (Exception ex) { Logging.SaveLog("Server country lookup", ex); }
+        });
     }
 
     public async Task RefreshSubscriptions()

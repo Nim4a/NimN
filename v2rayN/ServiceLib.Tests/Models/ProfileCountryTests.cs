@@ -21,6 +21,24 @@ public class ProfileCountryTests
     }
 
     [Test]
+    public async Task ServerCountryOverridesLabelButNotMeasuredExit()
+    {
+        var profile = new ProfileItemModel { Remarks = "DE-01" };
+        var property = typeof(ProfileItemModel).GetProperty("ServerCountryCode");
+        await (property != null).Should().BeEqualTo(true);
+        var notifications = 0;
+        profile.PropertyChanged += (_, e) => { if (e.PropertyName == "CountryCode") notifications++; };
+        property!.SetValue(profile, "FR");
+        await profile.CountryCode.Should().BeEqualTo("FR");
+        await notifications.Should().BeEqualTo(1);
+        profile.IpInfo = "(JP) 192.0.2.1";
+        await profile.CountryCode.Should().BeEqualTo("JP");
+        profile.IpInfo = "";
+        property.SetValue(profile, null);
+        await profile.CountryCode.Should().BeEqualTo("DE");
+    }
+
+    [Test]
     public async Task CountryChangesNotifyBindings()
     {
         var profile = new ProfileItemModel { Remarks = "🇺🇸 New York" };

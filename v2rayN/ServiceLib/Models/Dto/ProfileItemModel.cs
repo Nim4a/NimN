@@ -49,7 +49,21 @@ public partial class ProfileItemModel : ReactiveObject
     [Reactive]
     public partial string TodayUp { get; set; }
 
-    public string? CountryCode => ProfileCountry.Resolve(IpInfo, Remarks);
+    private string? _serverCountryCode;
+    public string? ServerCountryCode
+    {
+        get => _serverCountryCode;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _serverCountryCode, value);
+            this.RaisePropertyChanged(nameof(CountryCode));
+        }
+    }
+
+    // A measured exit country wins; an IP lookup must not overwrite IpInfo.
+    public string? CountryCode => ProfileCountry.Resolve(IpInfo, null)
+        ?? ProfileCountry.Normalize(ServerCountryCode)
+        ?? ProfileCountry.Resolve(null, Remarks);
 
     [Reactive]
     public partial string TodayDown { get; set; }

@@ -120,6 +120,6 @@ jobs:
           RELEASE_TAG: ${{ github.ref_name }}
         run: |
           set -euo pipefail
-          gh release create "$RELEASE_TAG" --verify-tag --draft --prerelease --title "NimN $RELEASE_TAG" --notes 'Personal PattN fork: NI application and status icons, NimN branding, bundled country flag images beside profile names. Country inferred from IP-test results or profile labels; unknown locations are not guessed. Windows x64 WPF and Avalonia portable packages. Unsigned binaries; SHA-256 checksums included. Unit tests and both UI builds must pass before upload. Device-side connection testing is still required.'
+          gh release create "$RELEASE_TAG" --verify-tag --draft --prerelease --title "NimN $RELEASE_TAG" --notes 'Personal PattN fork: NI application and status icons, NimN branding, bundled country flag images beside profile names. Country flags update automatically from public server IP lookup over HTTPS (ipwho.is); measured exit-country results take precedence. Only public IPs are submitted, never credentials. Server location can differ from exit location; unknown locations are not guessed. Windows x64 WPF and Avalonia portable packages. Unsigned binaries; SHA-256 checksums included. Unit tests and both UI builds must pass before upload. Device-side connection testing is still required.'
           gh release upload "$RELEASE_TAG" dist/*.zip dist/*.sha256
           gh release edit "$RELEASE_TAG" --draft=false
