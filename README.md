@@ -1,24 +1,19 @@
-# PattN
+# NimN
 
-v2rayN fork for Iranians
+Personal fork of [PattN](https://github.com/patterniha/PattN), based on [v2rayN](https://github.com/2dust/v2rayN). Original copyright and GPL-3.0 license are retained.
 
-**تغییرات v2rayN:**
+## تغییرات نسخه شخصی
 
-* اضافه شدن cipherSuites و فینگرپرینت unsafe در تنظیمات و شیرلینک.
+- نام NimN و آیکون NI برای برنامه و وضعیت‌های سینی سیستم.
+- تصویر پرچم کنار نام کانفیگ در رابط‌های WPF و Avalonia؛ بدون وابستگی به نمایش ایموجی ویندوز.
+- کشور از نتیجهٔ تست IP استخراج می‌شود؛ در نبود آن، از برچسب کشور در نام کانفیگ استفاده می‌شود. کشور ناشناخته حدس زده نمی‌شود. برچسب نام، تضمین موقعیت واقعی سرور نیست.
 
-**تغییرات Xray-core:**
+## دانلود و تست
 
-* امکان اتصال به کانفیگ‌های غیر رمزنگاری شده برای آدرس‌های عمومی در VLESS و TROJAN
+[Releases](https://github.com/Nim4a/NimN/releases) · [Build status](https://github.com/Nim4a/NimN/actions/workflows/nimn-release.yml)
 
+Workflow اختصاصی، تست‌ها و دو رابط ویندوز x64 را می‌سازد. تگ‌های `v*-nimn.*` پس از موفقیت بیلد، نسخهٔ آزمایشی منتشر می‌کنند. فایل‌ها امضای دیجیتال ندارند؛ SHA-256 کنار ZIP قرار می‌گیرد. بیلد موفق جایگزین تست اتصال روی دستگاه نیست.
 
-## حمایت
+## Upstream
 
-اگر کارهای بنده باعث دسترسی شما به اینترنت آزاد شده است ممنون میشم حمایتی هم از اینجانب انجام دهید
-
-`USDT (BEP20)`: 0x76a768B53Ca77B43086946315f0BDF21156bF424
-
-`USDT (TRC20)`: TU5gKvKqcXPn8itp1DouBCwcqGHMemBm8o
-
-`TON (TON)`: UQAc-mZB3y7uxWHKiMmq0ORZEYgycWDWZ4V1k73HsXvTJx-i
-
-@patterniha
+PattN adds Iran-focused defaults and support for cipherSuites / unsafe fingerprints, with a modified Xray core. Original upstream documentation and donation details: [PattN README](https://github.com/patterniha/PattN#readme).

@@ -5,11 +5,11 @@
 		<ApplicationIcon>Assets\v2rayN.ico</ApplicationIcon>
 		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 		<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-		<AssemblyName>PattN</AssemblyName>
+		<AssemblyName>NimN</AssemblyName>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<CETCompat>false</CETCompat>
-		<AssemblyTitle>PattN</AssemblyTitle>
-		<Product>PattN</Product>
+		<AssemblyTitle>NimN</AssemblyTitle>
+		<Product>NimN</Product>
 	</PropertyGroup>
 
 	<ItemGroup>

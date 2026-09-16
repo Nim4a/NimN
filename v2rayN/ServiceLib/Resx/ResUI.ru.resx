@@ -721,7 +721,7 @@
     <value>Включить мультиплексирование Mux</value>
   </data>
   <data name="TbSettingsN" xml:space="preserve">
-    <value>Настройки PattN</value>
+    <value>Настройки NimN</value>
   </data>
   <data name="TbSettingsPass" xml:space="preserve">
     <value>Пароль авторизации</value>
@@ -1783,7 +1783,7 @@
     <value>Общий ключ (PSK)</value>
   </data>
   <data name="menuExport2InnerUri" xml:space="preserve">
-    <value>Экспорт внутренней ссылки PattN в буфер обмена</value>
+    <value>Экспорт внутренней ссылки NimN в буфер обмена</value>
   </data>
   <data name="MsgCheckUpdateHasNewVersion" xml:space="preserve">
     <value>Доступна новая версия {0}: {1}</value>
@@ -1849,7 +1849,7 @@
     <value>Поставщик корневых сертификатов</value>
   </data>
   <data name="TbRootCertificateProviderTip" xml:space="preserve">
-    <value>Применяется только к загрузкам и сетевым запросам графического интерфейса PattN. Не влияет на проверку сертификатов ядром</value>
+    <value>Применяется только к загрузкам и сетевым запросам графического интерфейса NimN. Не влияет на проверку сертификатов ядром</value>
   </data>
   <data name="TbProxyDialResolveStrategy" xml:space="preserve">
     <value>Стратегия разрешения DNS при подключении к прокси</value>

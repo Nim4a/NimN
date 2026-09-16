@@ -16,6 +16,7 @@
     mc:Ignorable="d">
     <UserControl.Resources>
         <conv:DelayColorConverter x:Key="DelayColorConverter" />
+        <conv:CountryFlagConverter x:Key="CountryFlagConverter" />
     </UserControl.Resources>
     <Grid>
         <DockPanel>
@@ -213,12 +214,6 @@
                         Header="{x:Static resx:ResUI.LvServiceType}"
                         Tag="ConfigType" />
 
-                    <DataGridTextColumn
-                        Width="50"
-                        Binding="{Binding CountryCode}"
-                        Header="{x:Static resx:ResUI.LvCountry}"
-                        Tag="CountryCode" />
-
                     <DataGridTemplateColumn SortMemberPath="Remarks" Tag="Remarks">
                         <DataGridTemplateColumn.Header>
                             <TextBlock Text="{x:Static resx:ResUI.LvRemarks}" />
@@ -226,6 +221,9 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Margin="{StaticResource MarginLr8}" Orientation="Horizontal">
+                                    <Image Width="20" Height="14" Margin="0,0,6,0"
+                                           Source="{Binding CountryCode, Converter={StaticResource CountryFlagConverter}}"
+                                           ToolTip.Tip="{Binding CountryCode}" />
                                     <Label
                                         Margin="{StaticResource MarginLr4}"
                                         Classes="Solid Red"

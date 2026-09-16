@@ -6,7 +6,16 @@ public partial class ProfileItemModel : ReactiveObject
     public bool IsActive { get; set; }
     public string IndexId { get; set; }
     public EConfigType ConfigType { get; set; }
-    public string Remarks { get; set; }
+    private string _remarks;
+    public string Remarks
+    {
+        get => _remarks;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _remarks, value);
+            this.RaisePropertyChanged(nameof(CountryCode));
+        }
+    }
     public string Address { get; set; }
     public int Port { get; set; }
     public string Network { get; set; }
@@ -26,14 +35,21 @@ public partial class ProfileItemModel : ReactiveObject
     [Reactive]
     public partial string SpeedVal { get; set; }
 
-    [Reactive]
-    public partial string IpInfo { get; set; }
+    private string _ipInfo;
+    public string IpInfo
+    {
+        get => _ipInfo;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _ipInfo, value);
+            this.RaisePropertyChanged(nameof(CountryCode));
+        }
+    }
 
     [Reactive]
     public partial string TodayUp { get; set; }
 
-    [Reactive]
-    public partial string CountryCode { get; set; }
+    public string? CountryCode => ProfileCountry.Resolve(IpInfo, Remarks);
 
     [Reactive]
     public partial string TodayDown { get; set; }

@@ -18,6 +18,7 @@
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisConverter" />
         <conv:DelayColorConverter x:Key="DelayColorConverter" />
+        <conv:CountryFlagConverter x:Key="CountryFlagConverter" />
     </UserControl.Resources>
     <Grid>
         <DockPanel>
@@ -284,7 +285,7 @@
                         Binding="{Binding ConfigType}"
                         ExName="ConfigType"
                         Header="{x:Static resx:ResUI.LvServiceType}" />
-                    <base:MyDGTextColumn
+                    <base:MyDGCountryColumn
                         Width="150"
                         Binding="{Binding Remarks}"
                         ExName="Remarks"

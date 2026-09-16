@@ -152,7 +152,7 @@ public sealed class CoreInfoManager
                     DownloadUrlLinux64 = urlN + "/download/{0}/NimN-linux-64.zip",
                     DownloadUrlLinuxArm64 = urlN + "/download/{0}/NimN-linux-arm64.zip",
                     DownloadUrlLinuxRiscV64 = urlN + "/download/{0}/NimN-linux-riscv64.zip",
-                    DownloadUrlLinuxLoong64 = urlN + "/download/{0}/PattN-linux-loong64.zip",
+                    DownloadUrlLinuxLoong64 = urlN + "/download/{0}/NimN-linux-loong64.zip",
                     DownloadUrlOSX64 = urlN + "/download/{0}/NimN-macos-64.zip",
                     DownloadUrlOSXArm64 = urlN + "/download/{0}/NimN-macos-arm64.zip",
                 },
