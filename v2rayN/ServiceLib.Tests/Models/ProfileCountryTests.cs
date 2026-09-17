@@ -21,6 +21,24 @@ public class ProfileCountryTests
     }
 
     [Test]
+    [Arguments("(JP) 192.0.2.1", " fr ", "DE-01", "JP", "FR")]
+    [Arguments("", "uk", "🇺🇸 New York", null, "GB")]
+    [Arguments("(DE) 203.0.113.1", null, "France", "DE", null)]
+    [Arguments("(unknown) 192.0.2.1", "invalid", "🇯🇵 Japan", null, null)]
+    [Arguments(null, null, "DE-01", null, null)]
+    [Arguments("", "", "France", null, null)]
+    public async Task LocationFlagsUseIndependentSources(string? ip, string? endpoint, string remarks, string? expectedExit, string? expectedEndpoint)
+    {
+        var profile = new ProfileItemModel { IpInfo = ip!, ServerCountryCode = endpoint, Remarks = remarks };
+        var exitProperty = typeof(ProfileItemModel).GetProperty("ExitCountryCode");
+        var endpointProperty = typeof(ProfileItemModel).GetProperty("EndpointCountryCode");
+        await (exitProperty != null).Should().BeEqualTo(true);
+        await (endpointProperty != null).Should().BeEqualTo(true);
+        await ((string?)exitProperty!.GetValue(profile)).Should().BeEqualTo(expectedExit);
+        await ((string?)endpointProperty!.GetValue(profile)).Should().BeEqualTo(expectedEndpoint);
+    }
+
+    [Test]
     public async Task ServerCountryOverridesLabelButNotMeasuredExit()
     {
         var profile = new ProfileItemModel { Remarks = "DE-01" };
@@ -36,6 +54,33 @@ public class ProfileCountryTests
         profile.IpInfo = "";
         property.SetValue(profile, null);
         await profile.CountryCode.Should().BeEqualTo("DE");
+    }
+
+    [Test]
+    public async Task IndependentLocationChangesNotifyBindings()
+    {
+        var profile = new ProfileItemModel { Remarks = "DE-01" };
+        var changes = new List<string?>();
+        profile.PropertyChanged += (_, e) => changes.Add(e.PropertyName);
+        profile.IpInfo = "(JP) 192.0.2.1";
+        await changes.Contains("ExitCountryCode").Should().BeEqualTo(true);
+        await profile.ExitCountryCode.Should().BeEqualTo("JP");
+        await profile.EndpointCountryCode.Should().BeEqualTo(null);
+        changes.Clear();
+        profile.ServerCountryCode = "FR";
+        await changes.Contains("EndpointCountryCode").Should().BeEqualTo(true);
+        await profile.ExitCountryCode.Should().BeEqualTo("JP");
+        await profile.EndpointCountryCode.Should().BeEqualTo("FR");
+        changes.Clear();
+        profile.IpInfo = "";
+        profile.ServerCountryCode = null;
+        await changes.Contains("ExitCountryCode").Should().BeEqualTo(true);
+        await changes.Contains("EndpointCountryCode").Should().BeEqualTo(true);
+        await profile.ExitCountryCode.Should().BeEqualTo(null);
+        await profile.EndpointCountryCode.Should().BeEqualTo(null);
+        profile.Remarks = "France";
+        await profile.ExitCountryCode.Should().BeEqualTo(null);
+        await profile.EndpointCountryCode.Should().BeEqualTo(null);
     }
 
     [Test]

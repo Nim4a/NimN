@@ -12,8 +12,8 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<CETCompat>false</CETCompat>
 		<AssemblyName>NimN</AssemblyName>
-		<AssemblyTitle>NimN</AssemblyTitle>
-		<Product>NimN</Product>
+		<AssemblyTitle>NiN</AssemblyTitle>
+		<Product>NiN</Product>
 	</PropertyGroup>
 
 	<ItemGroup>

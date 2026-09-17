@@ -42,6 +42,7 @@ public partial class ProfileItemModel : ReactiveObject
         set
         {
             this.RaiseAndSetIfChanged(ref _ipInfo, value);
+            this.RaisePropertyChanged(nameof(ExitCountryCode));
             this.RaisePropertyChanged(nameof(CountryCode));
         }
     }
@@ -56,13 +57,18 @@ public partial class ProfileItemModel : ReactiveObject
         set
         {
             this.RaiseAndSetIfChanged(ref _serverCountryCode, value);
+            this.RaisePropertyChanged(nameof(EndpointCountryCode));
             this.RaisePropertyChanged(nameof(CountryCode));
         }
     }
 
-    // A measured exit country wins; an IP lookup must not overwrite IpInfo.
-    public string? CountryCode => ProfileCountry.Resolve(IpInfo, null)
-        ?? ProfileCountry.Normalize(ServerCountryCode)
+    // Independent observations: an endpoint/CDN IP estimate does not identify a hidden origin.
+    public string? ExitCountryCode => ProfileCountry.Resolve(IpInfo, null);
+    public string? EndpointCountryCode => ProfileCountry.Normalize(ServerCountryCode);
+
+    // Legacy hint fallback only; location flags bind to the independent properties above.
+    public string? CountryCode => ExitCountryCode
+        ?? EndpointCountryCode
         ?? ProfileCountry.Resolve(null, Remarks);
 
     [Reactive]

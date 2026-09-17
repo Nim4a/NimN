@@ -8,8 +8,8 @@
 		<AssemblyName>NimN</AssemblyName>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<CETCompat>false</CETCompat>
-		<AssemblyTitle>NimN</AssemblyTitle>
-		<Product>NimN</Product>
+		<AssemblyTitle>NiN</AssemblyTitle>
+		<Product>NiN</Product>
 	</PropertyGroup>
 
 	<ItemGroup>
