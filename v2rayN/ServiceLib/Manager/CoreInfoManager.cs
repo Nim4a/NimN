@@ -1,4 +1,4 @@
-namespace ServiceLib.Manager;
+﻿namespace ServiceLib.Manager;
 
 public sealed class CoreInfoManager
 {
@@ -147,14 +147,14 @@ public sealed class CoreInfoManager
                     CoreType = ECoreType.v2rayN,
                     Url = GetCoreUrl(ECoreType.v2rayN),
                     ReleaseApiUrl = urlN.Replace(Global.GithubUrl, Global.GithubApiUrl),
-                    DownloadUrlWin64 = urlN + "/download/{0}/NimN-windows-64.zip",
-                    DownloadUrlWinArm64 = urlN + "/download/{0}/NimN-windows-arm64.zip",
-                    DownloadUrlLinux64 = urlN + "/download/{0}/NimN-linux-64.zip",
-                    DownloadUrlLinuxArm64 = urlN + "/download/{0}/NimN-linux-arm64.zip",
-                    DownloadUrlLinuxRiscV64 = urlN + "/download/{0}/NimN-linux-riscv64.zip",
-                    DownloadUrlLinuxLoong64 = urlN + "/download/{0}/NimN-linux-loong64.zip",
-                    DownloadUrlOSX64 = urlN + "/download/{0}/NimN-macos-64.zip",
-                    DownloadUrlOSXArm64 = urlN + "/download/{0}/NimN-macos-arm64.zip",
+                    DownloadUrlWin64 = urlN + "/download/{0}/NiN-windows-64.zip",
+                    DownloadUrlWinArm64 = urlN + "/download/{0}/NiN-windows-arm64.zip",
+                    DownloadUrlLinux64 = urlN + "/download/{0}/NiN-linux-64.zip",
+                    DownloadUrlLinuxArm64 = urlN + "/download/{0}/NiN-linux-arm64.zip",
+                    DownloadUrlLinuxRiscV64 = urlN + "/download/{0}/NiN-linux-riscv64.zip",
+                    DownloadUrlLinuxLoong64 = urlN + "/download/{0}/NiN-linux-loong64.zip",
+                    DownloadUrlOSX64 = urlN + "/download/{0}/NiN-macos-64.zip",
+                    DownloadUrlOSXArm64 = urlN + "/download/{0}/NiN-macos-arm64.zip",
                 },
 
                 new CoreInfo

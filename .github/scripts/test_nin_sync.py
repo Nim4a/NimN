@@ -1,4 +1,4 @@
-"""Stdlib-only unittests for .github/scripts/nimn_sync.py (side-effect safety).
+﻿"""Stdlib-only unittests for .github/scripts/nin_sync.py (side-effect safety).
 
 Every subprocess call is faked: no network, no real git commands, no remote
 changes. Focus is on what the sync must and must never do to the repo:
@@ -22,14 +22,14 @@ HERE = Path(__file__).resolve().parent
 
 def _load_module():
     spec = importlib.util.spec_from_file_location(
-        "nimn_sync_under_test", HERE / "nimn_sync.py"
+        "nin_sync_under_test", HERE / "nin_sync.py"
     )
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod
 
 
-nimn_sync = _load_module()
+nin_sync = _load_module()
 
 OLD_TAG = "7.25.1-P26"
 NEW_TAG = "7.26.0-P27"
@@ -42,7 +42,7 @@ BUILD_PROPS = (
 
 
 class FakeRunner:
-    """Stands in for nimn_sync.run: records calls, fakes gh/git outcomes."""
+    """Stands in for nin_sync.run: records calls, fakes gh/git outcomes."""
 
     def __init__(self, upstream_tag=NEW_TAG, merge_fails=False, guard_fails=False,
                  ancestor_fails=False, protected_changes=()):
@@ -75,7 +75,7 @@ class FakeRunner:
             if args[-1] in self.protected_changes:
                 return args[-1]
             return ""
-        if len(args) > 1 and args[1].endswith("nimn_guard.py"):
+        if len(args) > 1 and args[1].endswith("nin_guard.py"):
             if self.guard_fails:
                 raise subprocess.CalledProcessError(1, args)
             return "guards passed"
@@ -97,11 +97,11 @@ class SyncTestCase(unittest.TestCase):
         self.root = Path(tmp.name)
         (self.root / ".github" / "scripts").mkdir(parents=True)
         (self.root / "v2rayN").mkdir()
-        self.state_path = self.root / ".github" / "nimn-upstream.json"
+        self.state_path = self.root / ".github" / "nin-upstream.json"
         self.write_state(OLD_TAG, OLD_SHA)
         (self.root / "v2rayN" / "Directory.Build.props").write_text(
             BUILD_PROPS, encoding="utf-8")
-        (self.root / ".github" / "scripts" / "nimn_guard.py").write_text(
+        (self.root / ".github" / "scripts" / "nin_guard.py").write_text(
             "print('ok')\n", encoding="utf-8")
         self.github_output = self.root / "github_output.txt"
         self.github_output.write_text("", encoding="utf-8")
@@ -109,7 +109,7 @@ class SyncTestCase(unittest.TestCase):
         self.addCleanup(os.chdir, old_cwd)
         os.chdir(self.root)
         self._env = mock.patch.dict(os.environ, {
-            "GITHUB_REPOSITORY": "herbert-kara/NimN",
+            "GITHUB_REPOSITORY": "herbert-kara/NiN",
             "GITHUB_OUTPUT": str(self.github_output),
         })
         self._env.start()
@@ -126,9 +126,9 @@ class SyncTestCase(unittest.TestCase):
 
     def run_main(self, runner):
         stdout = io.StringIO()
-        with mock.patch.object(nimn_sync, "run", runner), \
+        with mock.patch.object(nin_sync, "run", runner), \
                 contextlib.redirect_stdout(stdout):
-            nimn_sync.main()
+            nin_sync.main()
         return stdout.getvalue()
 
     def git_calls(self, runner):
@@ -166,29 +166,29 @@ class SyncTestCase(unittest.TestCase):
                 self.assert_state_untouched()
 
     def test_validate_tag_accepts_release_shape(self):
-        self.assertEqual(nimn_sync.validate_tag("7.25.1-P26"), "7.25.1-P26")
-        self.assertEqual(nimn_sync.validate_tag("0.0.1-P0"), "0.0.1-P0")
+        self.assertEqual(nin_sync.validate_tag("7.25.1-P26"), "7.25.1-P26")
+        self.assertEqual(nin_sync.validate_tag("0.0.1-P0"), "0.0.1-P0")
 
     # -- 3. candidate tag semantic numeric shape ------------------------------
     def test_candidate_tag_semantic_numeric_shape(self):
-        tag = nimn_sync.candidate_tag("7.25.1", NEW_SHA)
-        m = re.fullmatch(r"v7\.25\.1-nimn\.(\d+)\.([0-9a-f]{8})", tag)
+        tag = nin_sync.candidate_tag("7.25.1", NEW_SHA)
+        m = re.fullmatch(r"v7\.25\.1-nin\.(\d+)\.([0-9a-f]{8})", tag)
         self.assertIsNotNone(m, tag)
         ident = int(m.group(1))
         # Numeric identifier: same-base PattN releases must sort newer than
-        # a plain "nimn.3" prerelease (docstring contract).
+        # a plain "nin.3" prerelease (docstring contract).
         self.assertGreater(ident, 3)
         self.assertEqual(m.group(2), NEW_SHA[:8])
         # Stable for a given sha/base: second call only differs by clock.
-        tag2 = nimn_sync.candidate_tag("7.25.1", NEW_SHA)
-        self.assertEqual(tag2.split("-nimn.")[0], tag.split("-nimn.")[0])
+        tag2 = nin_sync.candidate_tag("7.25.1", NEW_SHA)
+        self.assertEqual(tag2.split("-nin.")[0], tag.split("-nin.")[0])
         self.assertTrue(tag2.endswith(NEW_SHA[:8]))
 
     def test_candidate_tag_rejects_non_semver_base(self):
         for bad in ("v7.25.1", "7.25", "7.25.1-P26", ""):
             with self.subTest(base=bad):
                 with self.assertRaises(ValueError):
-                    nimn_sync.candidate_tag(bad, NEW_SHA)
+                    nin_sync.candidate_tag(bad, NEW_SHA)
 
     # -- 4. successful merge publishes exactly one tag -------------------------
     def test_successful_merge_writes_state_tags_pushes_and_outputs(self):
@@ -202,7 +202,7 @@ class SyncTestCase(unittest.TestCase):
         self.assertEqual(state["sha"], NEW_SHA)
         self.assertEqual(state["candidate"], release_tag)
         # tag shape: base from Directory.Build.props + numeric id + sha prefix
-        self.assertRegex(release_tag, r"^v7\.25\.1-nimn\.\d+\.[0-9a-f]{8}$")
+        self.assertRegex(release_tag, r"^v7\.25\.1-nin\.\d+\.[0-9a-f]{8}$")
         self.assertTrue(release_tag.endswith(NEW_SHA[:8]))
         # pushed by exact ref, nothing else
         self.assertEqual(
@@ -245,14 +245,14 @@ class SyncTestCase(unittest.TestCase):
         self.assert_no_publish(runner)
         self.assert_state_untouched()
 
-    def test_non_nimn_repository_aborts_before_any_call(self):
+    def test_non_nin_repository_aborts_before_any_call(self):
         runner = FakeRunner()
         stdout = io.StringIO()
         with mock.patch.dict(os.environ, {"GITHUB_REPOSITORY": "Nim4a/Other"}), \
-                mock.patch.object(nimn_sync, "run", runner), \
+                mock.patch.object(nin_sync, "run", runner), \
                 contextlib.redirect_stdout(stdout):
             with self.assertRaises(RuntimeError):
-                nimn_sync.main()
+                nin_sync.main()
         self.assertEqual(runner.calls, [])
         self.assert_no_publish(runner)
         self.assert_state_untouched()

@@ -1,4 +1,4 @@
-"""User-visible identity and decoded tray palette regression checks."""
+﻿"""User-visible identity and decoded tray palette regression checks."""
 import unittest
 from pathlib import Path
 from PIL import Image
@@ -12,7 +12,35 @@ class NiNIdentityTests(unittest.TestCase):
         for project in ['v2rayN/v2rayN/v2rayN.csproj', 'v2rayN/v2rayN.Desktop/v2rayN.Desktop.csproj']:
             text = (ROOT / project).read_text(encoding='utf-8-sig')
             self.assertTrue('<Product>NiN</Product>' in text)
-            self.assertTrue('<AssemblyName>NimN</AssemblyName>' in text)
+            self.assertTrue('<AssemblyName>NiN</AssemblyName>' in text)
+
+    def test_persistent_identity_survives_display_rename(self):
+        text = (ROOT / 'v2rayN/ServiceLib/Global.cs').read_text(encoding='utf-8-sig')
+        self.assertIn('public const string AppId = "NiN";', text)
+        self.assertIn('AutoRunName = "v2rayNAutoRun"', text)
+        webdav = (ROOT / 'v2rayN/ServiceLib/Manager/WebDavManager.cs').read_text(encoding='utf-8-sig')
+        self.assertEqual(webdav.count('Global.AppId + "_backup"'), 2)
+        self.assertIn('_config.WebDavItem.DirName.TrimEx()', webdav)
+        self.assertNotIn('Global.AppName', webdav)
+        startup = (ROOT / 'v2rayN/ServiceLib/Handler/AutoStartupHandler.cs').read_text(encoding='utf-8-sig')
+        for suffix in ['.desktop', '-LaunchAgent.plist', '-LaunchAgent</string>']:
+            self.assertIn('{Global.AppId}' + suffix, startup)
+        self.assertNotIn('Global.AppName', startup)
+        self.assertIn('{Global.AutoRunName}_{Utils.GetMd5(Utils.StartupPath())}', startup)
+
+    def test_localized_display_strings_use_nin(self):
+        import xml.etree.ElementTree as ET
+        resources = list((ROOT / 'v2rayN/ServiceLib/Resx').glob('ResUI*.resx'))
+        resources += list((ROOT / 'v2rayN/AmazTool/Resx').glob('Resource*.resx'))
+        self.assertGreater(len(resources), 10)
+        for path in resources:
+            for data in ET.parse(path).getroot().findall('data'):
+                value = data.findtext('value') or ''
+                with self.subTest(file=path.name, key=data.get('name')):
+                    self.assertNotIn('NimN', value)
+        update = (ROOT / 'v2rayN/ServiceLib/Services/UpdateService.cs').read_text(encoding='utf-8-sig')
+        self.assertIn('"No complete NiN release available"', update)
+        self.assertIn('NiNRelease.SelectTag', update)
 
     def test_tray_colors_visible_at_all_icon_sizes(self):
         for folder in ['v2rayN/v2rayN/Resources', 'v2rayN/v2rayN.Desktop/Assets']:

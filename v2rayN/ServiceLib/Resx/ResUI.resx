@@ -724,7 +724,7 @@
     <value>Turn on Mux Multiplexing</value>
   </data>
   <data name="TbSettingsN" xml:space="preserve">
-    <value>NimN settings</value>
+    <value>NiN settings</value>
   </data>
   <data name="TbSettingsPass" xml:space="preserve">
     <value>Auth pass</value>
@@ -1795,7 +1795,7 @@ The "Get Certificate" action may fail if a self-signed certificate is used or if
     <value>PreSharedKey</value>
   </data>
   <data name="menuExport2InnerUri" xml:space="preserve">
-    <value>Export NimN Internal Share Link to Clipboard</value>
+    <value>Export NiN Internal Share Link to Clipboard</value>
   </data>
   <data name="MsgCheckUpdateHasNewVersion" xml:space="preserve">
     <value>{0} has a new version available: {1}</value>
@@ -1861,7 +1861,7 @@ The "Get Certificate" action may fail if a self-signed certificate is used or if
     <value>Root Certificate Provider</value>
   </data>
   <data name="TbRootCertificateProviderTip" xml:space="preserve">
-    <value>Only applies to the NimN GUI's downloads and network requests. Does not affect the core's certificate validation.</value>
+    <value>Only applies to the NiN GUI's downloads and network requests. Does not affect the core's certificate validation.</value>
   </data>
   <data name="TbProxyDialResolveStrategy" xml:space="preserve">
     <value>Proxy Dial Resolution Strategy</value>

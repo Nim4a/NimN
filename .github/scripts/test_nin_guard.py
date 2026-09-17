@@ -1,10 +1,10 @@
-"""Fail-closed behavior tests for nimn_guard.py, run against an isolated temp root.
+﻿"""Fail-closed behavior tests for nin_guard.py, run against an isolated temp root.
 
-Copies only the files nimn_guard inspects (required text files + the asset
+Copies only the files nin_guard inspects (required text files + the asset
 manifest and every file it hashes) from the real repo into a pristine
-snapshot, clones the snapshot per test, points nimn_guard.ROOT at the clone,
+snapshot, clones the snapshot per test, points nin_guard.ROOT at the clone,
 and verifies that check() passes on an intact tree and fails closed when
-NimN identity/branding/integration markers are lost. No real repo file is
+NiN identity/branding/integration markers are lost. No real repo file is
 ever modified.
 """
 import json
@@ -16,11 +16,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import nimn_guard  # noqa: E402
+import nin_guard  # noqa: E402
 
-REPO = Path(nimn_guard.ROOT)
+REPO = Path(nin_guard.ROOT)
 
-ASSET_MANIFEST = '.github/nimn-assets.json'
+ASSET_MANIFEST = '.github/nin-assets.json'
 TEXT_FILES = [
     'v2rayN/ServiceLib/Global.cs',
     'v2rayN/ServiceLib/Services/UpdateService.cs',
@@ -44,11 +44,11 @@ def _copy(src: Path, dst: Path) -> None:
     shutil.copy2(src, dst)
 
 
-class NimNGuardFailClosedTest(unittest.TestCase):
+class NiNGuardFailClosedTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Pristine snapshot built once from the real repo (read-only source).
-        cls.pristine = Path(tempfile.mkdtemp(prefix='nimn_guard_pristine_'))
+        cls.pristine = Path(tempfile.mkdtemp(prefix='nin_guard_pristine_'))
         _copy(REPO / ASSET_MANIFEST, cls.pristine / ASSET_MANIFEST)
         for rel in TEXT_FILES:
             _copy(REPO / rel, cls.pristine / rel)
@@ -60,20 +60,20 @@ class NimNGuardFailClosedTest(unittest.TestCase):
         shutil.rmtree(cls.pristine, ignore_errors=True)
 
     def setUp(self):
-        self.root = Path(tempfile.mkdtemp(prefix='nimn_guard_root_'))
+        self.root = Path(tempfile.mkdtemp(prefix='nin_guard_root_'))
         shutil.copytree(self.pristine, self.root, dirs_exist_ok=True)
-        self._old_root = nimn_guard.ROOT
-        nimn_guard.ROOT = self.root  # guard now reads only the isolated clone
+        self._old_root = nin_guard.ROOT
+        nin_guard.ROOT = self.root  # guard now reads only the isolated clone
 
     def tearDown(self):
-        nimn_guard.ROOT = self._old_root
+        nin_guard.ROOT = self._old_root
         shutil.rmtree(self.root, ignore_errors=True)
 
     # -- scenarios ---------------------------------------------------------
 
     def test_normal_intact_tree_passes(self):
         # Must not raise and must reach the success print.
-        self.assertEqual(nimn_guard.check(), None)
+        self.assertEqual(nin_guard.check(), None)
 
     def test_altered_notify_icon_fails(self):
         icon = self.root / NI_ICON
@@ -81,7 +81,7 @@ class NimNGuardFailClosedTest(unittest.TestCase):
         data[len(data) // 2] ^= 0xFF  # flip one byte, same size
         icon.write_bytes(bytes(data))
         with self.assertRaises(RuntimeError) as ctx:
-            nimn_guard.check()
+            nin_guard.check()
         self.assertIn('icon/flag changed', str(ctx.exception))
         self.assertIn('NotifyIcon1.ico', str(ctx.exception))
 
@@ -92,8 +92,8 @@ class NimNGuardFailClosedTest(unittest.TestCase):
         xaml.write_text(text.replace(WPF_NEEDLE, 'DeletedColumn'),
                         encoding='utf-8-sig')
         with self.assertRaises(RuntimeError) as ctx:
-            nimn_guard.check()
-        self.assertIn('NimN customization lost', str(ctx.exception))
+            nin_guard.check()
+        self.assertIn('NiN customization lost', str(ctx.exception))
         self.assertIn(WPF_XAML, str(ctx.exception))
         self.assertIn(WPF_NEEDLE, str(ctx.exception))
 
@@ -104,8 +104,8 @@ class NimNGuardFailClosedTest(unittest.TestCase):
         cs.write_text(text.replace(AUTO_RESOLVER_NEEDLE, '/* gone */'),
                       encoding='utf-8-sig')
         with self.assertRaises(RuntimeError) as ctx:
-            nimn_guard.check()
-        self.assertIn('NimN customization lost', str(ctx.exception))
+            nin_guard.check()
+        self.assertIn('NiN customization lost', str(ctx.exception))
         self.assertIn(AUTO_RESOLVER_CS, str(ctx.exception))
         self.assertIn(AUTO_RESOLVER_NEEDLE, str(ctx.exception))
 
@@ -113,7 +113,7 @@ class NimNGuardFailClosedTest(unittest.TestCase):
         # Fail closed even on IO errors, not just content mismatches.
         (self.root / WPF_XAML).unlink()
         with self.assertRaises(OSError):
-            nimn_guard.check()
+            nin_guard.check()
 
 
 if __name__ == '__main__':

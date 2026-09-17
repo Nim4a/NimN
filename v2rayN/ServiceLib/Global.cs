@@ -1,8 +1,10 @@
-namespace ServiceLib;
+﻿namespace ServiceLib;
 
 public class Global
 {
     public const string AppName = "NiN";
+    // Stable storage/startup identity; independent of the user-visible brand.
+    public const string AppId = "NiN";
     public const string GithubUrl = "https://github.com";
     public const string GithubApiUrl = "https://api.github.com/repos";
     public const string GeoUrl = "https://github.com/Chocolate4U/Iran-v2ray-rules/releases/latest/download/{0}.dat";
@@ -86,7 +88,7 @@ public class Global
     public const int MinFontSize = 8;
     public const int MinFontSizeCount = 13;
     public const string RebootAs = "rebootas";
-    public const string AvaAssets = "avares://NimN/Assets/";
+    public const string AvaAssets = "avares://NiN/Assets/";
     public const string LocalAppData = "V2RAYN_LOCAL_APPLICATION_DATA_V2";
     public const string V2RayLocalAsset = "V2RAY_LOCATION_ASSET";
     public const string XrayLocalAsset = "XRAY_LOCATION_ASSET";
@@ -662,7 +664,7 @@ public class Global
         { ECoreType.overtls, "ShadowsocksR-Live/overtls" },
         { ECoreType.shadowquic, "spongebob888/shadowquic" },
         { ECoreType.mieru, "enfein/mieru" },
-        { ECoreType.v2rayN, "herbert-kara/NimN" },
+        { ECoreType.v2rayN, "herbert-kara/NiN" },
     };
 
     public static readonly List<string> OtherGeoUrls =

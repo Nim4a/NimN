@@ -1,4 +1,4 @@
-namespace ServiceLib.Models.Dto;
+﻿namespace ServiceLib.Models.Dto;
 
 public class SemanticVersion : IEquatable<SemanticVersion>, IComparable
 {
@@ -189,8 +189,8 @@ public class SemanticVersion : IEquatable<SemanticVersion>, IComparable
     {
         // PattN: "-P<n>" marks a PattN revision on top of the upstream version, not a semver pre-release,
         // so it ranks above the bare version (and above any real pre-release) and compares numerically
-        var leftRevision = GetNimNRevision(left);
-        var rightRevision = GetNimNRevision(right);
+        var leftRevision = GetNiNRevision(left);
+        var rightRevision = GetNiNRevision(right);
         if (leftRevision.HasValue || rightRevision.HasValue)
         {
             if (leftRevision.HasValue && rightRevision.HasValue)
@@ -247,7 +247,7 @@ public class SemanticVersion : IEquatable<SemanticVersion>, IComparable
         }
     }
 
-    private static int? GetNimNRevision(string? prerelease)
+    private static int? GetNiNRevision(string? prerelease)
     {
         if (prerelease is { Length: > 1 }
             && prerelease[0] == 'P'
