@@ -25,7 +25,7 @@ def candidate_tag(base, upstream_sha):
 
 
 def main():
-    if os.environ.get("GITHUB_REPOSITORY", "Nim4a/NimN") != "Nim4a/NimN":
+    if os.environ.get("GITHUB_REPOSITORY", "herbert-kara/NimN") != "herbert-kara/NimN":
         raise RuntimeError("This automation only writes the personal NimN fork")
     upstream = json.loads(run("gh", "api", "repos/patterniha/PattN/releases/latest"))
     tag = validate_tag(upstream["tag_name"])
@@ -37,7 +37,7 @@ def main():
     if pending:
         if not re.fullmatch(r"v\d+\.\d+\.\d+-nimn\.\d+\.[0-9a-f]{8}", pending):
             raise ValueError("Invalid stored candidate")
-        releases = json.loads(run("gh", "api", "--paginate", "--slurp", "repos/Nim4a/NimN/releases?per_page=100"))
+        releases = json.loads(run("gh", "api", "--paginate", "--slurp", "repos/herbert-kara/NimN/releases?per_page=100"))
         completed = any(r["tag_name"] == pending and not r["draft"] and not r["prerelease"]
                         for page in releases for r in page)
         if not completed:

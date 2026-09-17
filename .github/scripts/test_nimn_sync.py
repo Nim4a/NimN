@@ -109,7 +109,7 @@ class SyncTestCase(unittest.TestCase):
         self.addCleanup(os.chdir, old_cwd)
         os.chdir(self.root)
         self._env = mock.patch.dict(os.environ, {
-            "GITHUB_REPOSITORY": "Nim4a/NimN",
+            "GITHUB_REPOSITORY": "herbert-kara/NimN",
             "GITHUB_OUTPUT": str(self.github_output),
         })
         self._env.start()

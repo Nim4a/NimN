@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   gate:
-    if: github.repository == 'Nim4a/NimN'
+    if: github.repository == 'herbert-kara/NimN'
     runs-on: ubuntu-latest
     outputs:
       blocked: ${{ steps.gate.outputs.blocked }}
@@ -32,7 +32,7 @@ jobs:
           fi
   prepare:
     needs: gate
-    if: github.repository == 'Nim4a/NimN' && needs.gate.outputs.blocked != 'true'
+    if: github.repository == 'herbert-kara/NimN' && needs.gate.outputs.blocked != 'true'
     runs-on: ubuntu-latest
     outputs:
       tag: ${{ steps.sync.outputs.tag }}
@@ -81,7 +81,7 @@ jobs:
         run: gh release edit "$RELEASE_TAG" --draft=false --prerelease=false --latest
   report:
     needs: [gate, prepare, draft, advance, publish]
-    if: failure() && github.repository == 'Nim4a/NimN'
+    if: failure() && github.repository == 'herbert-kara/NimN'
     runs-on: ubuntu-latest
     steps:
       - env:

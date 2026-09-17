@@ -116,7 +116,7 @@ jobs:
           if-no-files-found: error
 
   release:
-    if: github.repository == 'Nim4a/NimN' && (inputs.release_tag != '' || startsWith(github.ref, 'refs/tags/'))
+    if: github.repository == 'herbert-kara/NimN' && (inputs.release_tag != '' || startsWith(github.ref, 'refs/tags/'))
     needs: build
     runs-on: ubuntu-latest
     permissions:

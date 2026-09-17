@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 def check():
     required = {
-        'v2rayN/ServiceLib/Global.cs': ['AppName = "NimN"', '"Nim4a/NimN"'],
+        'v2rayN/ServiceLib/Global.cs': ['AppName = "NimN"', '"herbert-kara/NimN"'],
         'v2rayN/ServiceLib/Services/UpdateService.cs': ['NimNRelease.SelectTag'],
         'v2rayN/ServiceLib/ViewModels/ProfilesViewModel.cs': ['ServerCountryService.Instance.ResolveAsync'],
         'v2rayN/ServiceLib/Models/Dto/ProfileItemModel.cs': ['ServerCountryCode', 'CountryCode'],
