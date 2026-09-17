@@ -8,9 +8,9 @@ COLORS = [(51, 153, 204), (220, 38, 38), (147, 51, 234), (22, 128, 61)]
 
 class NiNIdentityTests(unittest.TestCase):
     def test_display_brand_preserves_update_identity(self):
-        self.assertTrue('AppName = "NiN"' in (ROOT / 'v2rayN/ServiceLib/Global.cs').read_text())
+        self.assertTrue('AppName = "NiN"' in (ROOT / 'v2rayN/ServiceLib/Global.cs').read_text(encoding='utf-8-sig'))
         for project in ['v2rayN/v2rayN/v2rayN.csproj', 'v2rayN/v2rayN.Desktop/v2rayN.Desktop.csproj']:
-            text = (ROOT / project).read_text()
+            text = (ROOT / project).read_text(encoding='utf-8-sig')
             self.assertTrue('<Product>NiN</Product>' in text)
             self.assertTrue('<AssemblyName>NimN</AssemblyName>' in text)
 
